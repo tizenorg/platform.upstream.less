@@ -10,6 +10,7 @@ Summary:        A text file browser similar to more, but better
 Url:            http://www.greenwoodsoftware.com/less/
 Group:          Applications/Text
 Source0:        http://www.greenwoodsoftware.com/less/%{name}-%{version}.tar.gz
+Source1001: 	less.manifest
 BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  libtool
@@ -27,6 +28,7 @@ files, and you'll use it frequently.
 
 %prep
 %setup -q
+cp %{SOURCE1001} .
 
 %build
 
@@ -42,5 +44,6 @@ strip -R .comment %{buildroot}/%{_bindir}/less
 %docs_package
 
 %files
+%manifest %{name}.manifest
 %doc LICENSE
 %{_bindir}/*
