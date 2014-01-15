@@ -3,12 +3,12 @@
 #
 
 Name:           less
-Version:        451
-Release:        5
+Version:        458
+Release:        0
 License:        GPL-3.0+
 Summary:        A text file browser similar to more, but better
 Url:            http://www.greenwoodsoftware.com/less/
-Group:          Applications/Text
+Group:          System/Utilities
 Source0:        http://www.greenwoodsoftware.com/less/%{name}-%{version}.tar.gz
 Source1001: 	less.manifest
 BuildRequires:  autoconf
@@ -45,5 +45,5 @@ strip -R .comment %{buildroot}/%{_bindir}/less
 
 %files
 %manifest %{name}.manifest
-%doc LICENSE
+%license LICENSE
 %{_bindir}/*
