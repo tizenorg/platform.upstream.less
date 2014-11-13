@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1984-2012  Mark Nudelman
+ * Copyright (C) 1984-2014  Mark Nudelman
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Less License, as specified in the README file.
@@ -701,5 +701,5 @@ get_quit_at_eof()
 	if (!less_is_more)
 		return quit_at_eof;
 	/* When less_is_more is set, the -e flag semantics are different. */
-	return quit_at_eof ? OPT_ON : OPT_ONPLUS;
+	return quit_at_eof ? OPT_ONPLUS : OPT_ON;
 }

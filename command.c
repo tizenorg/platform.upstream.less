@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1984-2012  Mark Nudelman
+ * Copyright (C) 1984-2014  Mark Nudelman
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Less License, as specified in the README file.
@@ -34,6 +34,7 @@ extern int top_scroll;
 extern int ignore_eoi;
 extern int secure;
 extern int hshift;
+extern int bs_mode;
 extern int show_attn;
 extern POSITION highest_hilite;
 extern char *every_first_cmd;
@@ -54,6 +55,7 @@ extern int screen_trashed;	/* The screen has been overwritten */
 extern int shift_count;
 extern int oldbot;
 extern int forw_prompt;
+extern int same_pos_bell;
 
 #if SHELL_ESCAPE
 static char *shellcmd = NULL;	/* For holding last shell command for "!!" */
@@ -68,6 +70,7 @@ static int optflag;
 static int optgetname;
 static POSITION bottompos;
 static int save_hshift;
+static int save_bs_mode;
 #if PIPEC
 static char pipec;
 #endif
@@ -210,7 +213,7 @@ exec_mca()
 	{
 	case A_F_SEARCH:
 	case A_B_SEARCH:
-		multi_search(cbuf, (int) number);
+		multi_search(cbuf, (int) number, 0);
 		break;
 #if HILITE_SEARCH
 	case A_FILTER:
@@ -523,6 +526,7 @@ mca_search_char(c)
 mca_char(c)
 	int c;
 {
+	char *cbuf;
 	int ret;
 
 	switch (mca)
@@ -778,7 +782,7 @@ getcc()
 		 * We have just run out of ungotten chars.
 		 */
 		unget_end = 0;
-		if (len_cmdbuf() == 0 || !empty_screen())
+		if (len_cmdbuf() == 0)
 			return (getchr());
 		/*
 		 * Command is incomplete, so try to complete it.
@@ -863,9 +867,10 @@ ungetsc(s)
  * If SRCH_PAST_EOF is set, continue the search thru multiple files.
  */
 	static void
-multi_search(pattern, n)
+multi_search(pattern, n, silent)
 	char *pattern;
 	int n;
+	int silent;
 {
 	register int nomore;
 	IFILE save_ifile;
@@ -940,7 +945,7 @@ multi_search(pattern, n)
 	 * Didn't find it.
 	 * Print an error message if we haven't already.
 	 */
-	if (n > 0)
+	if (n > 0 && !silent)
 		error("Pattern not found", NULL_PARG);
 
 	if (changed_file)
@@ -968,7 +973,7 @@ forw_loop(until_hilite)
 		return (A_NOACTION);
 
 	cmd_exec();
-	jump_forw();
+	jump_forw_buffered();
 	curr_len = ch_length();
 	highest_hilite = until_hilite ? curr_len : NULL_POSITION;
 	ignore_eoi = 1;
@@ -1013,7 +1018,6 @@ commands()
 	IFILE old_ifile;
 	IFILE new_ifile;
 	char *tagfile;
-	int until_hilite = 0;
 
 	search_type = SRCH_FORW;
 	wscroll = (sc_height + 1) / 2;
@@ -1241,6 +1245,8 @@ commands()
 			/*
 			 * Forward forever, ignoring EOF.
 			 */
+			if (show_attn)
+				set_attnpos(bottompos);
 			newaction = forw_loop(0);
 			break;
 
@@ -1326,6 +1332,17 @@ commands()
 				jump_back(number);
 			break;
 
+		case A_GOEND_BUF:
+			/*
+			 * Go to line N, default last buffered byte.
+			 */
+			cmd_exec();
+			if (number <= 0)
+				jump_forw_buffered();
+			else
+				jump_back(number);
+			break;
+
 		case A_GOPOS:
 			/*
 			 * Go to a specified byte position in the file.
@@ -1368,6 +1385,7 @@ commands()
 				 * previous file.
 				 */
 				hshift = save_hshift;
+				bs_mode = save_bs_mode;
 				if (edit_prev(1) == 0)
 					break;
 			}
@@ -1383,7 +1401,7 @@ commands()
 			if (number <= 0) number = 1;	\
 			mca_search();			\
 			cmd_exec();			\
-			multi_search((char *)NULL, (int) number);
+			multi_search((char *)NULL, (int) number, 0);
 
 
 		case A_F_SEARCH:
@@ -1471,6 +1489,8 @@ commands()
 			cmd_exec();
 			save_hshift = hshift;
 			hshift = 0;
+			save_bs_mode = bs_mode;
+			bs_mode = BS_SPECIAL;
 			(void) edit(FAKE_HELPFILE);
 			break;
 

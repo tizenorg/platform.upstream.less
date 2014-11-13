@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1984-2012  Mark Nudelman
+ * Copyright (C) 1984-2014  Mark Nudelman
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Less License, as specified in the README file.
@@ -295,6 +295,15 @@ struct scrpos
 	int ln;
 };
 
+/*
+ * A mark is an ifile (input file) plus a position within the file.
+ */
+struct mark 
+{
+	IFILE m_ifile;
+	struct scrpos m_scrpos;
+};
+
 typedef union parg
 {
 	char *p_string;
@@ -308,6 +317,17 @@ struct textlist
 {
 	char *string;
 	char *endstring;
+};
+
+struct wchar_range
+{
+	LWCHAR first, last;
+};
+
+struct wchar_range_table 
+{
+	struct wchar_range *table;
+	int count;
 };
 
 #define	EOI		(-1)

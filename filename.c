@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1984-2012  Mark Nudelman
+ * Copyright (C) 1984-2014  Mark Nudelman
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Less License, as specified in the README file.
@@ -481,17 +481,25 @@ bin_file(f)
 	if (lseek(f, (off_t)0, SEEK_SET) == BAD_LSEEK)
 		return (0);
 	n = read(f, data, sizeof(data));
-	pend = &data[n];
-	for (p = data;  p < pend;  )
+	if (n <= 0)
+		return (0);
+	if (utf_mode)
 	{
-		LWCHAR c = step_char(&p, +1, pend);
-		if (ctldisp == OPT_ONPLUS && IS_CSI_START(c))
+		bin_count = utf_bin_count(data, n);
+	} else
+	{
+		pend = &data[n];
+		for (p = data;  p < pend;  )
 		{
-			do {
-				c = step_char(&p, +1, pend);
-			} while (p < pend && is_ansi_middle(c));
-		} else if (binary_char(c))
-			bin_count++;
+			LWCHAR c = step_char(&p, +1, pend);
+			if (ctldisp == OPT_ONPLUS && IS_CSI_START(c))
+			{
+				do {
+					c = step_char(&p, +1, pend);
+				} while (p < pend && is_ansi_middle(c));
+			} else if (binary_char(c))
+				bin_count++;
+		}
 	}
 	/*
 	 * Call it a binary file if there are more than 5 binary characters

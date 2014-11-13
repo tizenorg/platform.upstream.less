@@ -1,4 +1,4 @@
-.TH LESSKEY 1 "Version 458: 04 Apr 2013"
+.TH LESSKEY 1 "Version 466: 23 Aug 2014"
 .SH NAME
 lesskey \- specify key bindings for less
 .SH SYNOPSIS
@@ -190,6 +190,7 @@ default command keys used by less:
 	\ee>		goto-end 
 	>		goto-end 
 	\eke	goto-end
+	\eeG		goto-end-buffered
 	=		status 
 	^G		status 
 	:f		status 
@@ -376,6 +377,6 @@ Suite 330, Boston, MA  02111-1307, USA.
 
 .SH AUTHOR
 .PP
-Mark Nudelman <bug-less@gnu.org>
+Mark Nudelman
 .br
 Send bug reports or comments to bug-less@gnu.org.
