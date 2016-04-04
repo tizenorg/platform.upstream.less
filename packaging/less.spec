@@ -24,6 +24,9 @@ files, and you'll use it frequently.
 cp %{SOURCE1001} .
 
 %build
+export CFLAGS+=" -fvisibility=hidden"
+  export CXXFLAGS+=" -fvisibility=hidden"
+  
 
 %configure
 make %{?_smp_mflags}
